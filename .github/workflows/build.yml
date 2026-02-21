@@ -1,0 +1,136 @@
+name: Build
+
+on:
+  push:
+    branches: [master, main]
+  pull_request:
+
+jobs:
+  build-native:
+    strategy:
+      matrix:
+        include:
+          - platform: linux-amd64
+            runner: ubuntu-latest
+            lib: libzvec_c.so
+          - platform: linux-arm64
+            runner: ubuntu-24.04-arm
+            lib: libzvec_c.so
+          - platform: macos-arm64
+            runner: macos-15
+            lib: libzvec_c.dylib
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout zvec-java
+        uses: actions/checkout@v4
+
+      - name: Parse zvec version
+        id: version
+        run: |
+          ZVEC_VERSION=$(grep '^zvecVersion=' gradle.properties | cut -d= -f2)
+          echo "zvec_version=$ZVEC_VERSION" >> "$GITHUB_OUTPUT"
+
+      - name: Cache zvec build
+        id: cache-zvec
+        uses: actions/cache@v4
+        with:
+          path: zvec/build
+          key: zvec-${{ steps.version.outputs.zvec_version }}-${{ matrix.platform }}
+
+      - name: Clone zvec
+        if: steps.cache-zvec.outputs.cache-hit != 'true'
+        run: |
+          git clone --recursive \
+            --branch ${{ steps.version.outputs.zvec_version }} \
+            --depth 1 \
+            https://github.com/alibaba/zvec.git
+
+      - name: Build zvec C++
+        if: steps.cache-zvec.outputs.cache-hit != 'true'
+        run: |
+          cd zvec
+          cmake -B build -DBUILD_TOOLS=OFF -DBUILD_PYTHON_BINDINGS=OFF
+          cmake --build build -j$(nproc 2>/dev/null || sysctl -n hw.ncpu)
+
+      - name: Build C bridge
+        run: |
+          cmake -B native/build -S native \
+            -DZVEC_ROOT=${{ github.workspace }}/zvec \
+            -DZVEC_BUILD_DIR=${{ github.workspace }}/zvec/build
+          cmake --build native/build
+
+      - name: Upload native library
+        uses: actions/upload-artifact@v4
+        with:
+          name: native-${{ matrix.platform }}
+          path: native/build/${{ matrix.lib }}
+
+  test:
+    needs: build-native
+    strategy:
+      matrix:
+        include:
+          - platform: linux-amd64
+            runner: ubuntu-latest
+          - platform: linux-arm64
+            runner: ubuntu-24.04-arm
+          - platform: macos-arm64
+            runner: macos-15
+    runs-on: ${{ matrix.runner }}
+    steps:
+      - name: Checkout zvec-java
+        uses: actions/checkout@v4
+
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Download native library
+        uses: actions/download-artifact@v4
+        with:
+          name: native-${{ matrix.platform }}
+          path: native-lib
+
+      - name: Run tests
+        run: ./gradlew :lib:test -PnativeLibPath=${{ github.workspace }}/native-lib
+
+  build-java:
+    needs: build-native
+    runs-on: ubuntu-latest
+    steps:
+      - name: Checkout zvec-java
+        uses: actions/checkout@v4
+
+      - name: Setup Java 25
+        uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '25'
+
+      - name: Download all native libraries
+        uses: actions/download-artifact@v4
+        with:
+          path: native-artifacts
+
+      - name: Stage native libraries into resources
+        run: |
+          mkdir -p lib/src/main/resources/native/linux-amd64
+          mkdir -p lib/src/main/resources/native/linux-arm64
+          mkdir -p lib/src/main/resources/native/darwin-arm64
+          cp native-artifacts/native-linux-amd64/* lib/src/main/resources/native/linux-amd64/
+          cp native-artifacts/native-linux-arm64/* lib/src/main/resources/native/linux-arm64/
+          cp native-artifacts/native-macos-arm64/* lib/src/main/resources/native/darwin-arm64/
+
+      - name: Build JAR
+        run: ./gradlew :lib:jar
+
+      - name: Verify JAR contents
+        run: jar tf lib/build/libs/*.jar | grep native/
+
+      - name: Upload JAR
+        uses: actions/upload-artifact@v4
+        with:
+          name: zvec-java-jar
+          path: lib/build/libs/*.jar

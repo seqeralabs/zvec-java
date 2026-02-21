@@ -9,3 +9,6 @@ build
 
 # JVM crash logs
 *.log
+
+# CI-staged native libraries
+lib/src/main/resources/native/
