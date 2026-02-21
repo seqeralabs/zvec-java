@@ -1,0 +1,41 @@
+/*
+ * Copyright 2026, Seqera Labs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+package io.seqera.zvec.type;
+
+public enum QuantizeType {
+    UNDEFINED(0),
+    FP16(1),
+    INT8(2),
+    INT4(3);
+
+    private final int value;
+
+    QuantizeType(int value) {
+        this.value = value;
+    }
+
+    public int value() {
+        return value;
+    }
+
+    public static QuantizeType fromValue(int value) {
+        for (QuantizeType t : values()) {
+            if (t.value == value) return t;
+        }
+        throw new IllegalArgumentException("Unknown QuantizeType value: " + value);
+    }
+}

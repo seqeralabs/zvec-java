@@ -11,4 +11,4 @@ build
 *.log
 
 # CI-staged native libraries
-lib/src/main/resources/native/
+lib-zvec/src/main/resources/native/

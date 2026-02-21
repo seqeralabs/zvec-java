@@ -41,6 +41,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${ZVEC_LIB_DIR}/libcore_utility.a
         ${ZVEC_LIB_DIR}/libcore_quantizer.a
         -Wl,--no-whole-archive
+        -Wl,--start-group
         ${ZVEC_LIB_DIR}/libzvec_db.a
         ${ZVEC_LIB_DIR}/libzvec_core.a
         ${ZVEC_LIB_DIR}/libzvec_index.a
@@ -63,6 +64,7 @@ if(CMAKE_SYSTEM_NAME STREQUAL "Linux")
         ${ZVEC_EXT_LIB_DIR}/libarrow_acero.a
         ${ZVEC_EXT_LIB_DIR}/libarrow_bundled_dependencies.a
         ${ZVEC_EXT_LIB_DIR}/liblz4.a
+        -Wl,--end-group
     )
 elseif(APPLE)
     target_link_libraries(zvec_c PRIVATE

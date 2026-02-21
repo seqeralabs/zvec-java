@@ -1,0 +1,56 @@
+plugins {
+    id 'io.seqera.java-library-conventions'
+}
+
+version = project.findProperty('version') != 'unspecified' ? project.findProperty('version') : file('VERSION').text.trim()
+
+dependencies {
+    testImplementation libs.groovy
+    testImplementation libs.spock.core
+    testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
+}
+
+tasks.named('test') {
+    useJUnitPlatform()
+    systemProperty 'java.library.path', project.findProperty('nativeLibPath') ?: "${rootProject.projectDir}/native/build"
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+    testLogging {
+        events 'failed'
+        exceptionFormat 'full'
+        showCauses true
+        showStackTraces true
+    }
+}
+
+/*
+ * Copyright 2026, Seqera Labs
+ *
+ * Licensed under the Apache License, Version 2.0 (the "License");
+ * you may not use this file except in compliance with the License.
+ * You may obtain a copy of the License at
+ *
+ *     http://www.apache.org/licenses/LICENSE-2.0
+ *
+ * Unless required by applicable law or agreed to in writing, software
+ * distributed under the License is distributed on an "AS IS" BASIS,
+ * WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
+ * See the License for the specific language governing permissions and
+ * limitations under the License.
+ */
+
+// Task to build the native C bridge via CMake
+tasks.register('buildNative') {
+    description = 'Builds the native C bridge library using CMake'
+    group = 'build'
+
+    doLast {
+        exec {
+            workingDir "${rootProject.projectDir}/native"
+            commandLine 'cmake', '-B', 'build', '-S', '.'
+        }
+        exec {
+            workingDir "${rootProject.projectDir}/native"
+            commandLine 'cmake', '--build', 'build'
+        }
+    }
+}

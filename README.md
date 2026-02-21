@@ -160,7 +160,7 @@ doc.fieldNames();          // Set<String>
 
 ```
 zvec-java/
-├── lib/                          # Main library
+├── lib-zvec/                     # Main library
 │   └── src/main/java/io/seqera/zvec/
 │       ├── Zvec.java             # Static entry point
 │       ├── Collection.java       # Collection operations
@@ -175,6 +175,27 @@ zvec-java/
 └── build.gradle / settings.gradle
 ```
 
+## CI / CD
+
+The GitHub Actions pipeline builds and tests across three platforms, then packages a multi-platform JAR:
+
+| Platform | Runner | Native library |
+|----------|--------|----------------|
+| linux-amd64 | ubuntu-24.04 | `libzvec_c.so` |
+| linux-arm64 | ubuntu-24.04-arm | `libzvec_c.so` |
+| macos-arm64 | macos-15 | `libzvec_c.dylib` |
+
+**Build steps per platform:**
+
+1. Clone and build the [zvec](https://github.com/alibaba/zvec) C++ library from the tag specified in `gradle.properties` (`zvecVersion`). Builds are cached across runs.
+2. Build the C bridge (`native/`) linking against zvec static libraries.
+3. Run all Spock tests against the native library.
+4. Upload the platform-specific native library as a build artifact.
+
+**JAR packaging** — a final job downloads all three native libraries and stages them into `lib-zvec/src/main/resources/native/{platform}/`, then builds a fat JAR. At runtime, `NativeLoader` detects the current OS/arch and extracts the matching library from the classpath.
+
+The zvec version is pinned in `gradle.properties` and used as part of the cache key, so bumping the version triggers a clean rebuild.
+
 ## License
 
-See [LICENSE](LICENSE) for details.
+[Apache License 2.0](https://www.apache.org/licenses/LICENSE-2.0)
