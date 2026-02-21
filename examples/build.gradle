@@ -1,0 +1,26 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+dependencies {
+    implementation project(':lib')
+}
+
+application {
+    mainClass = project.findProperty('mainClass') ?: 'io.seqera.zvec.examples.BasicExample'
+}
+
+tasks.named('run') {
+    systemProperty 'java.library.path', project.findProperty('nativeLibPath') ?: "${rootProject.projectDir}/native/build"
+}
