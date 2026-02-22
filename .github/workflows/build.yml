@@ -77,6 +77,9 @@ jobs:
       - name: Run tests
         run: ./gradlew :lib-zvec:test -PnativeLibPath=${{ github.workspace }}/native/build
 
+      - name: Run examples
+        run: bash examples/run-all.sh -PnativeLibPath=${{ github.workspace }}/native/build
+
       - name: Upload native library
         uses: actions/upload-artifact@v4
         with:

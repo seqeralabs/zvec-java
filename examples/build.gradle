@@ -38,6 +38,7 @@ application {
 }
 
 tasks.named('run') {
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
     systemProperty 'java.library.path', project.findProperty('nativeLibPath') ?: "${rootProject.projectDir}/native/build"
     jvmArgs '--enable-native-access=ALL-UNNAMED'
 }

@@ -21,3 +21,4 @@ plugins {
 rootProject.name = 'zvec-java'
 include('lib-zvec')
 include('examples')
+include('get-started')

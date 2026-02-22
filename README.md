@@ -4,40 +4,12 @@ Java binding for the [Zvec](https://github.com/seqeralabs/zvec) vector database 
 
 Uses the Java Foreign Function & Memory (FFM) API for zero-overhead native interop. Requires **Java 25+**.
 
-## Quick Start
+## Get Started
 
-```java
-import io.seqera.zvec.*;
-import io.seqera.zvec.param.*;
-import io.seqera.zvec.schema.*;
-import io.seqera.zvec.type.*;
-
-// Define schema
-var schema = new CollectionSchema("my_collection",
-        List.of(new FieldSchema("title", DataType.STRING)),
-        List.of(new VectorSchema("embedding", DataType.VECTOR_FP32, 4,
-                new FlatIndexParam(MetricType.COSINE))));
-
-// Create and open collection
-try (var collection = Zvec.createAndOpen("/tmp/my_collection", schema)) {
-    // Insert documents
-    collection.insert(new Doc("1")
-            .field("title", "Introduction to Vector Databases")
-            .vector("embedding", new float[]{0.1f, 0.2f, 0.3f, 0.4f}));
-    collection.insert(new Doc("2")
-            .field("title", "Machine Learning Basics")
-            .vector("embedding", new float[]{0.5f, 0.6f, 0.7f, 0.8f}));
-
-    // Query nearest neighbors
-    var query = new VectorQuery("embedding", new float[]{0.15f, 0.25f, 0.35f, 0.45f});
-    var results = collection.query(query, 2);
-
-    for (var doc : results) {
-        System.out.printf("id=%s, score=%.4f, title=%s%n",
-                doc.id(), doc.score(), doc.field("title"));
-    }
-}
+```bash
+./gradlew :get-started:run
 ```
+See the [get-started](get-started/) subproject for a complete working example with Gradle setup and dependency configuration.
 
 ## Features
 

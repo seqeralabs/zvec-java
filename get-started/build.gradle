@@ -1,0 +1,28 @@
+plugins {
+    id 'java'
+    id 'application'
+}
+
+repositories {
+    maven { url = 'https://s3-eu-west-1.amazonaws.com/maven.seqera.io/snapshots' }
+    mavenCentral()
+}
+
+java {
+    toolchain {
+        languageVersion = JavaLanguageVersion.of(25)
+    }
+}
+
+dependencies {
+    implementation 'io.seqera:lib-zvec:0.1.0-SNAPSHOT'
+}
+
+application {
+    mainClass = 'io.seqera.zvec.getstarted.Main'
+}
+
+tasks.named('run') {
+    javaLauncher = javaToolchains.launcherFor(java.toolchain)
+    jvmArgs '--enable-native-access=ALL-UNNAMED'
+}
