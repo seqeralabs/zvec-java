@@ -81,7 +81,7 @@ jobs:
         run: bash examples/run-all.sh -PnativeLibPath=${{ github.workspace }}/native/build
 
       - name: Upload native library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: native-${{ matrix.platform }}
           path: native/build/${{ matrix.lib }}
@@ -120,7 +120,7 @@ jobs:
         run: jar tf lib-zvec/build/libs/*.jar | grep native/
 
       - name: Upload JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4.6.2
         with:
           name: zvec-java-jar
           path: lib-zvec/build/libs/*.jar
