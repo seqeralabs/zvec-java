@@ -26,15 +26,15 @@ jobs:
     runs-on: ${{ matrix.runner }}
     steps:
       - name: Checkout zvec-java
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup CMake 3.31
-        uses: lukka/get-cmake@latest
+        uses: lukka/get-cmake@7bfc9baacbbdcb5e37957ad05c3546b3e222be3c # latest
         with:
           cmakeVersion: '3.31.6'
 
       - name: Setup Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: temurin
           java-version: '25'
@@ -47,7 +47,7 @@ jobs:
 
       - name: Cache zvec
         id: cache-zvec
-        uses: actions/cache@v4
+        uses: actions/cache@0057852bfaa89a56745cba8c7296529d2fc39830 # v4
         with:
           path: zvec
           key: zvec-v6-${{ steps.version.outputs.zvec_version }}-${{ matrix.platform }}
@@ -81,7 +81,7 @@ jobs:
         run: bash examples/run-all.sh -PnativeLibPath=${{ github.workspace }}/native/build
 
       - name: Upload native library
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: native-${{ matrix.platform }}
           path: native/build/${{ matrix.lib }}
@@ -91,16 +91,16 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - name: Checkout zvec-java
-        uses: actions/checkout@v4
+        uses: actions/checkout@34e114876b0b11c390a56381ad16ebd13914f8d5 # v4
 
       - name: Setup Java 25
-        uses: actions/setup-java@v4
+        uses: actions/setup-java@c1e323688fd81a25caa38c78aa6df2d33d3e20d9 # v4
         with:
           distribution: temurin
           java-version: '25'
 
       - name: Download all native libraries
-        uses: actions/download-artifact@v4
+        uses: actions/download-artifact@d3f86a106a0bac45b974a628896c90dbdf5c8093 # v4
         with:
           path: native-artifacts
 
@@ -120,7 +120,7 @@ jobs:
         run: jar tf lib-zvec/build/libs/*.jar | grep native/
 
       - name: Upload JAR
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
         with:
           name: zvec-java-jar
           path: lib-zvec/build/libs/*.jar
